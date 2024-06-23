@@ -1,12 +1,25 @@
-import { getMovie } from "../components/movie-info";
-import { getMovies } from "../app/(home)/page";
+"use client"
 import styles from "../styles/movie-info.module.css"
+import { useRouter } from "next/navigation";
+
+const API_URL = "https://nomad-movies.nomadcoders.workers.dev/movies";
+
+async function getMovie(id) {
+    const response = await fetch(`${API_URL}/${id}`);
+    return response.json();
+}
+
+async function getMovies() {
+    return fetch(API_URL).then(response => response.json());
+}
 
 export async function Similar({ id }) {
+    const router = useRouter();
+    
     const movie = await getMovie(id);
     const movieList = await getMovies();
     const genres = [];
-    movie.genres.map(arr => genres.push(arr.id));
+    movie.genres.map(genre => genres.push(genre.id));
 
     return (
         <div className={styles.similarContainer}>
@@ -14,7 +27,7 @@ export async function Similar({ id }) {
             <div className={styles.recommendationContainer}>{
                 movieList.map(movie => genres.filter(x => movie.genre_ids.includes(x)) ?
                     <div className={styles.recommendation}>
-                        <img src={movie.poster_path} className={styles.recommendationPoster} alt={movie.title} />
+                        <img src={movie.poster_path} className={styles.recommendationPoster} alt={movie.title} onClick={() => {router.push(`/movies/${movie.id}`)}}/>
                     </div> : ''
                 )
             }</div>
